@@ -1,0 +1,333 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* ── Empty State ──────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(239,68,68,0.1));
+  border: 1px solid rgba(245,158,11,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
+  box-shadow: 0 0 40px rgba(245,158,11,0.15);
+}
+
+.emptyState h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fbbf24, #ef4444);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.emptyState p {
+  font-size: 0.875rem;
+  color: #7070a0;
+  max-width: 420px;
+  line-height: 1.6;
+}
+
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.pipelineStep {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: #9090bb;
+}
+
+.pipelineIcon { color: #f59e0b; display: flex; align-items: center; }
+.pipelineArrow { color: #4a4a70; margin-left: 4px; }
+
+/* ── Progress Header ──────────────────────────────── */
+.progressHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.progressSteps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stepCircle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7070a0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: all 250ms;
+}
+
+.stepLabel {
+  font-size: 0.7rem;
+  color: #6060a0;
+  white-space: nowrap;
+  transition: color 250ms;
+}
+
+.stepConnector {
+  width: 20px;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 0 4px;
+  transition: background 250ms;
+}
+.stepConnectorDone { background: rgba(124,58,237,0.5); }
+
+.stepDone .stepCircle {
+  background: rgba(124,58,237,0.2);
+  border-color: rgba(124,58,237,0.5);
+  color: #a78bfa;
+}
+.stepDone .stepLabel { color: #a78bfa; }
+
+.stepActive .stepCircle {
+  background: rgba(245,158,11,0.15);
+  border-color: rgba(245,158,11,0.4);
+  color: #f59e0b;
+  box-shadow: 0 0 12px rgba(245,158,11,0.2);
+}
+.stepActive .stepLabel { color: #fbbf24; }
+
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.runningBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+/* ── Step Log ─────────────────────────────────────── */
+.stepLog {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.stepLogItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.775rem;
+  color: #7070a0;
+}
+
+.logCheck { color: #10b981; flex-shrink: 0; }
+.logSpinner { color: #f59e0b; flex-shrink: 0; }
+
+/* ── Error ────────────────────────────────────────── */
+.errorBox {
+  padding: 12px 16px;
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #fca5a5;
+}
+
+/* ── Results ──────────────────────────────────────── */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Collapsible ──────────────────────────────────── */
+.collapsible {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.collapsibleBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #b0b0d8;
+  transition: background 150ms;
+}
+.collapsibleBtn:hover { background: rgba(255,255,255,0.04); }
+
+.collapsibleBody {
+  padding: 4px 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.quoteBlock {
+  font-size: 0.8125rem;
+  color: #d0d0f0;
+  line-height: 1.6;
+  padding: 10px 14px;
+  background: rgba(124,58,237,0.08);
+  border-left: 3px solid rgba(124,58,237,0.4);
+  border-radius: 0 8px 8px 0;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ── Model Answers Grid ───────────────────────────── */
+.modelAnswers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.modelAnswer {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.modelAnswerHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.02);
+}
+
+.modelDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #7c3aed;
+  flex-shrink: 0;
+}
+
+.modelAnswerName {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #9090bb;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.modelAnswer .prose {
+  padding: 10px 12px;
+  font-size: 0.8rem !important;
+}
+
+/* ── Final Answer ─────────────────────────────────── */
+.finalAnswer {
+  background: rgba(245,158,11,0.05);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(245,158,11,0.08);
+}
+
+.finalHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(245,158,11,0.12);
+  background: rgba(245,158,11,0.06);
+}
+
+.finalIcon { color: #f59e0b; }
+
+.finalHeader span {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fbbf24;
+  flex: 1;
+}
+
+.finalBadge {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.25);
+  border-radius: 20px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.finalAnswer .prose {
+  padding: 16px;
+  font-size: 0.9375rem;
+}

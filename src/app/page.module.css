@@ -1,0 +1,377 @@
+.app {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  height: 100vh;
+  padding: 18px 18px 18px 14px;
+  display: flex;
+  justify-content: center;
+}
+
+.shell {
+  width: min(980px, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(8, 8, 20, 0.55);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 70px rgba(0,0,0,0.35);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(6,6,18,0.78);
+  backdrop-filter: blur(18px);
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.title h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.title p {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #7070a0;
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(245,158,11,0.10);
+  border: 1px solid rgba(245,158,11,0.18);
+  color: #fbbf24;
+  font-size: 0.8rem;
+  max-width: 640px;
+}
+
+.bannerClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #fbbf24;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms;
+}
+.bannerClose:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.16);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.keyBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #9090bb;
+  width: min(420px, 42vw);
+}
+
+.keyInput {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: #f0f0ff;
+  font-size: 0.85rem;
+}
+.keyInput::placeholder {
+  color: #5a5a88;
+}
+
+.eyeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #7070a0;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms, color 150ms;
+}
+.eyeBtn:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.16);
+  color: #f0f0ff;
+}
+
+/* ── Tab Bar (Chrome-like) ───────────────────────── */
+.tabBar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 10px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  flex-shrink: 0;
+}
+
+.tabList {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding-top: 8px;
+  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+}
+.tabList::-webkit-scrollbar { height: 4px; }
+
+.chromeTab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px 8px;
+  border-radius: 12px 12px 0 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-bottom: none;
+  color: #b0b0d8;
+  cursor: pointer;
+  min-width: 220px;
+  max-width: 280px;
+  transition: background 150ms, border-color 150ms;
+  position: relative;
+}
+.chromeTab:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.13);
+}
+
+.chromeTabActive {
+  background: rgba(12, 12, 28, 0.92);
+  border-color: rgba(255,255,255,0.16);
+  color: #f0f0ff;
+}
+.chromeTabActive::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 9999px;
+  background: var(--tab-accent, var(--accent));
+}
+
+.chromeTabDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chromeTabLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chromeTabSpacer { flex: 1; }
+
+.chromeTabClose {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #7070a0;
+  background: transparent;
+  border: 1px solid transparent;
+  opacity: 0;
+  transition: opacity 150ms, background 150ms, border-color 150ms, color 150ms;
+  flex-shrink: 0;
+}
+.chromeTab:hover .chromeTabClose,
+.chromeTabActive .chromeTabClose {
+  opacity: 1;
+}
+.chromeTabClose:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.12);
+  color: #f0f0ff;
+}
+.chromeTabCloseDisabled {
+  opacity: 0.25 !important;
+  pointer-events: none;
+}
+
+.newTabBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  width: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
+  color: #9090bb;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 150ms, border-color 150ms, color 150ms;
+}
+.newTabBtn:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.14);
+  color: #f0f0ff;
+}
+
+.closeAllBtn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.03);
+  color: #9090bb;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms, color 150ms;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+.closeAllBtn:hover {
+  background: rgba(249,115,22,0.08);
+  border-color: rgba(249,115,22,0.18);
+  color: #fdba74;
+}
+.closeAllBtnDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.panels {
+  flex: 1;
+  min-height: 0;
+  padding: 14px;
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-auto-rows: minmax(260px, 1fr);
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 900px) {
+  .main { padding: 12px 12px 12px 8px; }
+  .shell { border-radius: 16px; }
+  .header { flex-direction: column; align-items: stretch; }
+  .keyBox { width: 100%; }
+  .chromeTab { min-width: 190px; }
+}
+
+/* ── Modal ─────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 250;
+}
+
+.modal {
+  width: min(640px, 100%);
+  background: rgba(12, 12, 28, 0.98);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  padding: 14px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 4px 10px;
+}
+
+.modalTitle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+.modalTitle strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.modalSub {
+  font-size: 0.75rem;
+  color: #7070a0;
+}
+
+.modalClose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  cursor: pointer;
+  color: #9090bb;
+  transition: background 150ms, border-color 150ms, color 150ms;
+}
+.modalClose:hover {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.16);
+  color: #f0f0ff;
+}
+
+.modalHint {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: #5a5a88;
+  padding: 0 2px;
+}

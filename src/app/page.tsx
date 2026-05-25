@@ -1,65 +1,519 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Plus, X } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
+import PromptInput, { ChatMode } from "@/components/PromptInput";
+import ChatPanel, { PanelState } from "@/components/ChatPanel";
+import ModelSelector from "@/components/ModelSelector";
+import { AIModel, DEFAULT_MODELS, getProviderColor } from "@/lib/models";
+import styles from "./page.module.css";
+
+type ApiMessage = { role: "system" | "user" | "assistant"; content: string };
+
+type TabState = PanelState & { tabId: string; requestId: string | null };
+
+function makeTabId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return (crypto as Crypto).randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function createTab(model: AIModel): TabState {
+  return {
+    tabId: makeTabId(),
+    requestId: null,
+    model,
+    messages: [],
+    status: "idle",
+  };
+}
+
+function updateLastAssistant(messages: PanelState["messages"], content: string) {
+  if (messages.length === 0) return messages;
+  const last = messages[messages.length - 1];
+  if (last?.role !== "assistant") return messages;
+  const next = messages.slice();
+  next[next.length - 1] = { role: "assistant", content };
+  return next;
+}
+
+function tryParseJson(input: string): unknown | null {
+  try {
+    return JSON.parse(input);
+  } catch {
+    return null;
+  }
+}
+
+function extractDeltaContent(payload: unknown): string {
+  if (!payload || typeof payload !== "object") return "";
+  const choices = (payload as Record<string, unknown>)["choices"];
+  if (!Array.isArray(choices) || choices.length === 0) return "";
+
+  const first = choices[0];
+  if (!first || typeof first !== "object") return "";
+  const firstObj = first as Record<string, unknown>;
+
+  const delta = firstObj["delta"];
+  if (delta && typeof delta === "object") {
+    const content = (delta as Record<string, unknown>)["content"];
+    if (typeof content === "string") return content;
+  }
+
+  const message = firstObj["message"];
+  if (message && typeof message === "object") {
+    const content = (message as Record<string, unknown>)["content"];
+    if (typeof content === "string") return content;
+  }
+
+  return "";
+}
+
+async function streamChatCompletion(args: {
+  model: string;
+  messages: ApiMessage[];
+  apiKey?: string;
+  signal?: AbortSignal;
+  onDelta: (delta: string) => void;
+}) {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: args.model,
+      messages: args.messages,
+      apiKey: args.apiKey || undefined,
+    }),
+    signal: args.signal,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
+  if (!res.body) throw new Error("No response body");
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    const parts = buffer.split("\n\n");
+    buffer = parts.pop() ?? "";
+
+    for (const part of parts) {
+      const lines = part.split("\n");
+      for (const line of lines) {
+        if (!line.startsWith("data:")) continue;
+        const data = line.slice("data:".length).trim();
+        if (!data) continue;
+        if (data === "[DONE]") return;
+
+        const json = tryParseJson(data);
+        if (!json) continue;
+
+        const delta = extractDeltaContent(json);
+        if (delta) args.onDelta(delta);
+      }
+    }
+  }
+}
 
 export default function Home() {
+  const [activeMode, setActiveMode] = useState<ChatMode>("general");
+  const [tabs, setTabs] = useState<TabState[]>(() => [createTab(DEFAULT_MODELS[0] ?? DEFAULT_MODELS[DEFAULT_MODELS.length - 1])]);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const [modelPickerTabId, setModelPickerTabId] = useState<string | null>(null);
+  const [banner, setBanner] = useState<string | null>(null);
+
+  const abortControllers = useRef<Record<string, AbortController | null>>({});
+
+  const handleSend = async (prompt: string, mode: ChatMode) => {
+    setBanner(null);
+
+    if (mode !== "general") {
+      setBanner("Only Multi-Chat is enabled right now. Reasoning/Codo/Swarm are coming next.");
+      return;
+    }
+
+    if (tabs.length === 0) return;
+
+    const userMsg = { role: "user" as const, content: prompt };
+
+    // Abort any in-flight streams and create request IDs
+    const requestByTabId: Record<string, string> = {};
+    for (const t of tabs) {
+      abortControllers.current[t.tabId]?.abort();
+      abortControllers.current[t.tabId] = null;
+      requestByTabId[t.tabId] = makeTabId();
+    }
+
+    setTabs((prev) =>
+      prev.map((t) => ({
+        ...t,
+        requestId: requestByTabId[t.tabId] ?? t.requestId,
+        status: "loading",
+        error: undefined,
+        messages: [...t.messages, userMsg, { role: "assistant", content: "" }],
+      }))
+    );
+
+    const tasks = tabs.map((tab) => {
+      const tabId = tab.tabId;
+      const requestId = requestByTabId[tabId]!;
+      const controller = new AbortController();
+      abortControllers.current[tabId] = controller;
+
+      const baseMessages: ApiMessage[] = tab.messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const apiMessages: ApiMessage[] = [...baseMessages, userMsg];
+      let assistant = "";
+      let scheduled = false;
+
+       return streamChatCompletion({
+         model: tab.model.id,
+         messages: apiMessages,
+         apiKey: undefined,
+         signal: controller.signal,
+        onDelta: (delta) => {
+          assistant += delta;
+          if (scheduled) return;
+          scheduled = true;
+          requestAnimationFrame(() => {
+            scheduled = false;
+            setTabs((prev) =>
+              prev.map((t) =>
+                t.tabId !== tabId || t.requestId !== requestId
+                  ? t
+                  : {
+                      ...t,
+                      status: "streaming",
+                      messages: updateLastAssistant(t.messages, assistant),
+                    }
+              )
+            );
+          });
+        },
+      })
+        .then(() => {
+          setTabs((prev) =>
+            prev.map((t) =>
+              t.tabId !== tabId || t.requestId !== requestId
+                ? t
+                : {
+                    ...t,
+                    status: "done",
+                    messages: updateLastAssistant(t.messages, assistant),
+                  }
+            )
+          );
+        })
+        .catch((err: unknown) => {
+          const maybeAbort =
+            err &&
+            typeof err === "object" &&
+            "name" in err &&
+            (err as { name?: string }).name === "AbortError";
+          if (maybeAbort) return;
+
+          const message = err instanceof Error ? err.message : "Request failed";
+          setTabs((prev) =>
+            prev.map((t) =>
+              t.tabId !== tabId || t.requestId !== requestId ? t : { ...t, status: "error", error: message }
+            )
+          );
+        });
+    });
+
+    await Promise.allSettled(tasks);
+  };
+
+  const handleRetry = async (tabId: string) => {
+    setBanner(null);
+
+    const tab = tabs.find((t) => t.tabId === tabId);
+    if (!tab) return;
+
+    const msgs = tab.messages;
+    const lastUserIndex = (() => {
+      for (let i = msgs.length - 1; i >= 0; i--) {
+        if (msgs[i]?.role === "user") return i;
+      }
+      return -1;
+    })();
+    if (lastUserIndex < 0) return;
+
+    abortControllers.current[tabId]?.abort();
+    const controller = new AbortController();
+    abortControllers.current[tabId] = controller;
+    const requestId = makeTabId();
+
+    const trimmed = msgs.slice(0, lastUserIndex + 1);
+    const apiMessages: ApiMessage[] = trimmed.map((m) => ({ role: m.role, content: m.content }));
+
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.tabId !== tabId
+          ? t
+          : {
+              ...t,
+              requestId,
+              status: "loading",
+              error: undefined,
+              messages: [...trimmed, { role: "assistant", content: "" }],
+            }
+      )
+    );
+
+    let assistant = "";
+    let scheduled = false;
+    try {
+       await streamChatCompletion({
+         model: tab.model.id,
+         messages: apiMessages,
+         apiKey: undefined,
+         signal: controller.signal,
+        onDelta: (delta) => {
+          assistant += delta;
+          if (scheduled) return;
+          scheduled = true;
+          requestAnimationFrame(() => {
+            scheduled = false;
+            setTabs((prev) =>
+              prev.map((t) =>
+                t.tabId !== tabId || t.requestId !== requestId
+                  ? t
+                  : {
+                      ...t,
+                      status: "streaming",
+                      messages: updateLastAssistant(t.messages, assistant),
+                    }
+              )
+            );
+          });
+        },
+      });
+
+      setTabs((prev) =>
+        prev.map((t) =>
+          t.tabId !== tabId || t.requestId !== requestId
+            ? t
+            : {
+                ...t,
+                status: "done",
+                messages: updateLastAssistant(t.messages, assistant),
+              }
+        )
+      );
+    } catch (err: unknown) {
+      const maybeAbort =
+        err &&
+        typeof err === "object" &&
+        "name" in err &&
+        (err as { name?: string }).name === "AbortError";
+      if (maybeAbort) return;
+
+      const message = err instanceof Error ? err.message : "Request failed";
+      setTabs((prev) =>
+        prev.map((t) =>
+          t.tabId !== tabId || t.requestId !== requestId ? t : { ...t, status: "error", error: message }
+        )
+      );
+    }
+  };
+
+  const handleModelSelect = (tabId: string, model: AIModel) => {
+    abortControllers.current[tabId]?.abort();
+    abortControllers.current[tabId] = null;
+    setTabs((prev) =>
+      prev.map((t) =>
+        t.tabId !== tabId
+          ? t
+          : {
+              ...t,
+              requestId: null,
+              model,
+              messages: [],
+              status: "idle",
+              error: undefined,
+            }
+      )
+    );
+    setModelPickerTabId(null);
+  };
+
+  const handleNewTab = () => {
+    const model = DEFAULT_MODELS[0] ?? DEFAULT_MODELS[DEFAULT_MODELS.length - 1];
+    setTabs((prev) => {
+      const next = [...prev, createTab(model)];
+      setActiveIndex(next.length - 1);
+      return next;
+    });
+  };
+
+  const handleCloseTab = (idx: number) => {
+    if (tabs.length <= 1) return;
+
+    const closing = tabs[idx];
+    if (closing) {
+      abortControllers.current[closing.tabId]?.abort();
+      delete abortControllers.current[closing.tabId];
+      if (modelPickerTabId === closing.tabId) setModelPickerTabId(null);
+    }
+
+    const nextActive =
+      activeIndex === idx ? Math.max(0, idx - 1) : activeIndex > idx ? activeIndex - 1 : activeIndex;
+
+    setTabs((prev) => prev.filter((_, i) => i !== idx));
+    setActiveIndex(nextActive);
+  };
+
+  const handleCloseAllTabs = () => {
+    Object.values(abortControllers.current).forEach((c) => c?.abort());
+    abortControllers.current = {};
+    setModelPickerTabId(null);
+    setTabs(() => [createTab(DEFAULT_MODELS[0] ?? DEFAULT_MODELS[DEFAULT_MODELS.length - 1])]);
+    setActiveIndex(0);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className={styles.app}>
+      <Sidebar activeMode={activeMode} onModeChange={setActiveMode} />
+
+      <div className={styles.main}>
+        <div className={styles.shell}>
+          <header className={styles.header}>
+            <div className={styles.headerLeft}>
+              <div className={styles.title}>
+                <h1>Chat</h1>
+                <p>Use Chrome-style tabs to switch models and chats.</p>
+              </div>
+
+              {banner && (
+                <div className={styles.banner}>
+                  <span>{banner}</span>
+                  <button className={styles.bannerClose} onClick={() => setBanner(null)} title="Dismiss">
+                    <X size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
+
+             <div className={styles.headerRight}>
+               </div>
+          </header>
+
+          <div className={styles.tabBar}>
+            <div className={styles.tabList}>
+              {tabs.map((t, i) => {
+                const color = getProviderColor(t.model.provider);
+                const isActive = activeIndex === i;
+                return (
+                  <button
+                    key={t.tabId}
+                    className={`${styles.chromeTab} ${isActive ? styles.chromeTabActive : ""}`}
+                    onClick={() => setActiveIndex(i)}
+                    title={t.model.id}
+                    style={isActive ? ({ "--tab-accent": color } as React.CSSProperties) : undefined}
+                  >
+                    <span className={styles.chromeTabDot} style={{ background: color }} />
+                    <span className={styles.chromeTabLabel}>{t.model.name}</span>
+                    <span className={styles.chromeTabSpacer} />
+                    <span
+                      className={`${styles.chromeTabClose} ${tabs.length <= 1 ? styles.chromeTabCloseDisabled : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCloseTab(i);
+                      }}
+                      role="button"
+                      aria-label="Close tab"
+                      title={tabs.length <= 1 ? "At least one tab must remain" : "Close tab"}
+                    >
+                      <X size={14} />
+                    </span>
+                  </button>
+                );
+              })}
+
+              <button className={styles.newTabBtn} onClick={handleNewTab} title="New tab">
+                <Plus size={16} />
+              </button>
+            </div>
+
+            <button
+              className={`${styles.closeAllBtn} ${tabs.length <= 1 ? styles.closeAllBtnDisabled : ""}`}
+              onClick={handleCloseAllTabs}
+              disabled={tabs.length <= 1}
+              title={tabs.length <= 1 ? "Only one tab open" : "Close all tabs (keeps one)"}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Close all
+            </button>
+          </div>
+
+          <div className={styles.panels}>
+            {tabs.map((t, i) => (
+              <ChatPanel
+                key={t.tabId}
+                panel={t}
+                isActive={activeIndex === i}
+                onActivate={() => setActiveIndex(i)}
+                onRetry={() => handleRetry(t.tabId)}
+                onModelClick={() => setModelPickerTabId(t.tabId)}
+              />
+            ))}
+          </div>
+
+          <PromptInput
+            onSend={handleSend}
+            disabled={activeMode !== "general"}
+            activeMode={activeMode}
+            onModeChange={setActiveMode}
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </div>
+
+      {modelPickerTabId !== null && (
+        <div className={styles.modalOverlay} onMouseDown={() => setModelPickerTabId(null)}>
+          <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>
+                <strong>Select model</strong>
+                <span className={styles.modalSub}>
+                  {(() => {
+                    const idx = tabs.findIndex((t) => t.tabId === modelPickerTabId);
+                    return idx >= 0 ? `Tab #${idx + 1}` : "";
+                  })()}
+                </span>
+              </div>
+              <button className={styles.modalClose} onClick={() => setModelPickerTabId(null)} title="Close">
+                <X size={16} />
+              </button>
+            </div>
+            <ModelSelector
+              selectedModel={tabs.find((t) => t.tabId === modelPickerTabId)?.model ?? null}
+              onSelect={(m) => {
+                if (!modelPickerTabId) return;
+                handleModelSelect(modelPickerTabId, m);
+              }}
+              placeholder="Search 400+ models..."
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className={styles.modalHint}>
+              Switching models clears the tab conversation (for now).
+            </div>
+          </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }
