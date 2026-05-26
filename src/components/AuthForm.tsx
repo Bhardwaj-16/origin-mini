@@ -55,7 +55,7 @@ export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
             />
           </div>
           {error && <p className={styles.error}>{error}</p>}
-          <button type="submit">{mode === "login" ? "Login" : "Sign Up"}</button>
+          <button type="submit" className={styles.submitBtn}>{mode === "login" ? "Login" : "Sign Up"}</button>
         </form>
         
         <p className={styles.footer}>
