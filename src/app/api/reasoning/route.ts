@@ -44,8 +44,8 @@ async function callModel(
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, apiKey, debateModels } = await req.json();
-    const key = apiKey || process.env.OPENROUTER_API_KEY || "";
+    const { prompt, debateModels } = await req.json();
+    const key = process.env.OPENROUTER_API_KEY || "";
     const models: string[] = debateModels ?? DEFAULT_DEBATE_MODELS;
 
     const encoder = new TextEncoder();

@@ -4,13 +4,13 @@ const API_BASE = "https://ai.hackclub.com/proxy/v1";
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, model, apiKey } = await req.json();
+    const { messages, model } = await req.json();
 
     if (!model) {
       return NextResponse.json({ error: "Model is required" }, { status: 400 });
     }
 
-    const key = apiKey || process.env.OPENROUTER_API_KEY || "";
+    const key = process.env.OPENROUTER_API_KEY || "";
 
     const upstream = await fetch(`${API_BASE}/chat/completions`, {
       method: "POST",

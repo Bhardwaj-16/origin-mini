@@ -1,0 +1,97 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: white;
+  font-family: system-ui, sans-serif;
+}
+
+.card {
+  background: #111;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #333;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.card h1 {
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.card p {
+  color: #888;
+  margin-bottom: 2rem;
+}
+
+.inputGroup {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #ccc;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 0.75rem;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: white;
+  outline: none;
+}
+
+.inputGroup input:focus {
+  border-color: #555;
+}
+
+.error {
+  color: #ff4444;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  color: black;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.footer {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: #888;
+}
+
+.link {
+  background: none;
+  color: white;
+  text-decoration: underline;
+  width: auto;
+  padding: 0;
+  margin-left: 0.5rem;
+  font-weight: normal;
+}
+
+.link:hover {
+  opacity: 1;
+}
