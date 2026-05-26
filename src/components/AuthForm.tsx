@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./auth.module.css";
+import styles from "@/app/auth.module.css";
 
 export default function AuthPage({ mode }: { mode: "login" | "signup" }) {
   const [username, setUsername] = useState("");
