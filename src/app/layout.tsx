@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import MobileWarning from "@/components/MobileWarning";
 
 export const metadata: Metadata = {
   title: "ORIGIN Mini — Multi-AI Collaboration Platform",
@@ -20,7 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <MobileWarning />
+        {children}
+      </body>
     </html>
   );
 }
