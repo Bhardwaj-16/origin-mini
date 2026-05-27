@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const API_BASE = "https://ai.hackclub.com/proxy/v1";
+import { isFeaturedModel } from "@/lib/models";
+import { getApiConfig } from "@/lib/convex";
 
 // Default top 3 reasoning models for the debate
 const DEFAULT_DEBATE_MODELS = [
@@ -15,9 +15,10 @@ async function callModel(
   model: string,
   messages: { role: string; content: string }[],
   apiKey: string,
+  apiBase: string,
   maxTokens = 2048
 ): Promise<string> {
-  const res = await fetch(`${API_BASE}/chat/completions`, {
+  const res = await fetch(`${apiBase}/chat/completions`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${apiKey}`,
@@ -45,10 +46,22 @@ async function callModel(
 export async function POST(req: NextRequest) {
   try {
     const { prompt, debateModels } = await req.json();
-    const key = process.env.OPENROUTER_API_KEY || "";
     const models: string[] = debateModels ?? DEFAULT_DEBATE_MODELS;
 
     const encoder = new TextEncoder();
+    
+    // Pre-fetch configs to avoid doing it repeatedly
+    const featuredConfig = await getApiConfig("featured");
+    const allConfig = await getApiConfig("all");
+    
+    const getConfigForModel = (modelId: string) => {
+      const isFeatured = isFeaturedModel(modelId);
+      const config = isFeatured ? featuredConfig : allConfig;
+      return {
+        key: config?.apiKey || process.env.OPENROUTER_API_KEY || "",
+        base: config?.baseUrl || (isFeatured ? "https://openrouter.ai/api/v1" : "https://ai.hackclub.com/proxy/v1")
+      };
+    };
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -62,6 +75,7 @@ export async function POST(req: NextRequest) {
           // ── Step 1: Restructure the prompt ──────────────────
           send("step", { step: 1, label: "Restructuring prompt with Qwen…", total: 4 });
 
+          const restructureConf = getConfigForModel(RESTRUCTURE_MODEL);
           const restructured = await callModel(
             RESTRUCTURE_MODEL,
             [
@@ -72,7 +86,8 @@ export async function POST(req: NextRequest) {
               },
               { role: "user", content: prompt },
             ],
-            key,
+            restructureConf.key,
+            restructureConf.base,
             512
           );
 
@@ -86,8 +101,9 @@ export async function POST(req: NextRequest) {
           send("step", { step: 2, label: `Getting initial answers from ${models.length} models…`, total: 4 });
 
           const initialAnswers = await Promise.allSettled(
-            models.map(model =>
-              callModel(
+            models.map(model => {
+              const conf = getConfigForModel(model);
+              return callModel(
                 model,
                 [
                   {
@@ -97,9 +113,10 @@ export async function POST(req: NextRequest) {
                   },
                   { role: "user", content: restructured || prompt },
                 ],
-                key
+                conf.key,
+                conf.base
               ).then(content => ({ model, content }))
-            )
+            })
           );
 
           const answers = initialAnswers
@@ -124,8 +141,9 @@ export async function POST(req: NextRequest) {
             .join("\n\n---\n\n");
 
           const critiques = await Promise.allSettled(
-            answers.map(a =>
-              callModel(
+            answers.map(a => {
+              const conf = getConfigForModel(a.model);
+              return callModel(
                 a.model,
                 [
                   {
@@ -138,10 +156,11 @@ export async function POST(req: NextRequest) {
                     content: `Original question:\n${restructured || prompt}\n\nAnswers from different models:\n\n${debateContext}\n\nProvide your critical analysis and what the ideal answer should include.`,
                   },
                 ],
-                key,
+                conf.key,
+                conf.base,
                 1024
               ).then(content => ({ model: a.model, critique: content }))
-            )
+            })
           );
 
           const critiqueResults = critiques
@@ -161,6 +180,7 @@ export async function POST(req: NextRequest) {
             .map((c, i) => `### Critique ${i + 1}:\n${c.critique}`)
             .join("\n\n---\n\n");
 
+          const finalConf = getConfigForModel(RESTRUCTURE_MODEL);
           const finalAnswer = await callModel(
             RESTRUCTURE_MODEL,
             [
@@ -174,7 +194,8 @@ export async function POST(req: NextRequest) {
                 content: `Question:\n${restructured || prompt}\n\nInitial answers:\n\n${debateContext}\n\nCritiques:\n\n${critiqueContext}\n\nNow produce the final, best possible answer:`,
               },
             ],
-            key,
+            finalConf.key,
+            finalConf.base,
             4096
           );
 

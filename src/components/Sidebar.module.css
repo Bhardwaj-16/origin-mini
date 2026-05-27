@@ -255,3 +255,87 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ── History ───────────────────────────────────────── */
+.history {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 8px;
+  margin-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 12px;
+}
+
+.historyList {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.historyList::-webkit-scrollbar {
+  width: 4px;
+}
+.historyList::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+.emptyHistory {
+  font-size: 0.75rem;
+  color: #5a5a88;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 160ms;
+  text-align: left;
+  width: 100%;
+}
+
+.historyItem:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.08);
+}
+
+.historyIcon {
+  color: #5a5a88;
+  flex-shrink: 0;
+}
+
+.historyContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.historyTitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #c0c0e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.historyModel {
+  font-size: 0.65rem;
+  color: #5a5a88;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

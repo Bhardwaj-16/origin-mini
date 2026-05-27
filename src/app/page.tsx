@@ -134,6 +134,7 @@ export default function Home() {
 
   const [activeMode, setActiveMode] = useState<ChatMode>("general");
   const [tabs, setTabs] = useState<TabState[]>(() => [createTab(DEFAULT_MODELS[0] ?? DEFAULT_MODELS[DEFAULT_MODELS.length - 1])]);
+  const [chatHistory, setChatHistory] = useState<TabState[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const [modelPickerTabId, setModelPickerTabId] = useState<string | null>(null);
@@ -161,11 +162,11 @@ export default function Home() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setTabs(parsed);
+          if (Array.isArray(parsed)) {
+            setChatHistory(parsed);
           }
         } catch (e) {
-          console.error("Failed to parse saved tabs", e);
+          console.error("Failed to parse saved chats", e);
         }
       }
     }
@@ -173,13 +174,53 @@ export default function Home() {
 
   useEffect(() => {
     if (authLoaded && username) {
-      localStorage.setItem(`chats_${username}`, JSON.stringify(tabs));
+      localStorage.setItem(`chats_${username}`, JSON.stringify(chatHistory));
     }
-  }, [tabs, authLoaded, username]);
+  }, [chatHistory, authLoaded, username]);
+
+  useEffect(() => {
+    setChatHistory(prev => {
+      let updated = [...prev];
+      let changed = false;
+
+      for (const tab of tabs) {
+        if (tab.messages.length > 0) {
+          const existingIdx = updated.findIndex(t => t.tabId === tab.tabId);
+          if (existingIdx >= 0) {
+            if (updated[existingIdx] !== tab) {
+              updated[existingIdx] = tab;
+              changed = true;
+            }
+          } else {
+            updated = [tab, ...updated];
+            changed = true;
+          }
+        }
+      }
+      return changed ? updated : prev;
+    });
+  }, [tabs]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
+  };
+
+  const handleChatSelect = (tabId: string) => {
+    const existingTabIndex = tabs.findIndex(t => t.tabId === tabId);
+    if (existingTabIndex >= 0) {
+      setActiveIndex(existingTabIndex);
+      return;
+    }
+
+    const historyItem = chatHistory.find(t => t.tabId === tabId);
+    if (historyItem) {
+      setTabs(prev => {
+        const next = [...prev, historyItem];
+        setActiveIndex(next.length - 1);
+        return next;
+      });
+    }
   };
 
   const handleSend = async (prompt: string, mode: ChatMode) => {
@@ -437,6 +478,16 @@ export default function Home() {
     return <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", color: "#fff" }}>Loading...</div>;
   }
 
+  const sidebarHistory = chatHistory.map(chat => {
+    const firstUserMsg = chat.messages.find(m => m.role === "user")?.content;
+    const title = firstUserMsg ? (firstUserMsg.length > 30 ? firstUserMsg.substring(0, 30) + '...' : firstUserMsg) : "New Chat";
+    return {
+      id: chat.tabId,
+      title,
+      modelName: chat.model.name,
+    };
+  });
+
   return (
     <div className={styles.app}>
       <Sidebar 
@@ -444,6 +495,8 @@ export default function Home() {
         onModeChange={setActiveMode} 
         username={username}
         onLogout={handleLogout}
+        history={sidebarHistory}
+        onChatSelect={handleChatSelect}
       />
 
       <div className={styles.main}>

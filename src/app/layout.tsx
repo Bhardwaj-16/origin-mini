@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import MobileWarning from "@/components/MobileWarning";
+import ConvexClientProvider from "@/components/ConvexClientProvider";
 
 export const metadata: Metadata = {
   title: "ORIGIN Mini — Multi-AI Collaboration Platform",
@@ -22,8 +23,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <MobileWarning />
-        {children}
+        <ConvexClientProvider>
+          <MobileWarning />
+          {children}
+        </ConvexClientProvider>
       </body>
     </html>
   );

@@ -5,11 +5,19 @@ import { useState } from "react";
 import styles from "./Sidebar.module.css";
 import type { ChatMode } from "./PromptInput";
 
+export interface ChatHistoryItem {
+  id: string;
+  title: string;
+  modelName: string;
+}
+
 interface SidebarProps {
   activeMode: ChatMode;
   onModeChange: (mode: ChatMode) => void;
   username?: string | null;
   onLogout?: () => void;
+  history?: ChatHistoryItem[];
+  onChatSelect?: (id: string) => void;
 }
 
 const NAV_ITEMS = [
@@ -19,7 +27,7 @@ const NAV_ITEMS = [
   { id: "swarm" as ChatMode, icon: <Network size={18} />, label: "Agent Swarm", desc: "Autonomous web research" },
 ];
 
-export default function Sidebar({ activeMode, onModeChange, username, onLogout }: SidebarProps) {
+export default function Sidebar({ activeMode, onModeChange, username, onLogout, history = [], onChatSelect }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -71,6 +79,32 @@ export default function Sidebar({ activeMode, onModeChange, username, onLogout }
           </button>
         ))}
       </nav>
+
+      {/* History */}
+      <div className={styles.history}>
+        {!collapsed && <div className={styles.navLabel}>Recent Chats</div>}
+        <div className={styles.historyList}>
+          {history.length === 0 && !collapsed && (
+            <div className={styles.emptyHistory}>No recent chats</div>
+          )}
+          {history.map(chat => (
+            <button 
+              key={chat.id} 
+              className={styles.historyItem}
+              onClick={() => onChatSelect?.(chat.id)}
+              title={collapsed ? chat.title : undefined}
+            >
+              <MessageSquare size={14} className={styles.historyIcon} />
+              {!collapsed && (
+                <div className={styles.historyContent}>
+                  <span className={styles.historyTitle}>{chat.title}</span>
+                  <span className={styles.historyModel}>{chat.modelName}</span>
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Bottom section */}
       <div className={styles.bottom}>
