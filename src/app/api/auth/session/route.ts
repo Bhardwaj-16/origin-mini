@@ -9,5 +9,9 @@ export async function GET() {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
   
-  return NextResponse.json({ authenticated: true });
+  // session.value format is `session_${username}_${timestamp}`
+  const parts = session.value.split('_');
+  const username = parts.length >= 2 ? parts[1] : 'user';
+
+  return NextResponse.json({ authenticated: true, username });
 }

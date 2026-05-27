@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import PromptInput, { ChatMode } from "@/components/PromptInput";
@@ -127,6 +128,10 @@ async function streamChatCompletion(args: {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const [username, setUsername] = useState<string | null>(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
+
   const [activeMode, setActiveMode] = useState<ChatMode>("general");
   const [tabs, setTabs] = useState<TabState[]>(() => [createTab(DEFAULT_MODELS[0] ?? DEFAULT_MODELS[DEFAULT_MODELS.length - 1])]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -135,6 +140,47 @@ export default function Home() {
   const [banner, setBanner] = useState<string | null>(null);
 
   const abortControllers = useRef<Record<string, AbortController | null>>({});
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.username) {
+          setUsername(data.username);
+        } else {
+          router.push("/login");
+        }
+        setAuthLoaded(true);
+      })
+      .catch(() => setAuthLoaded(true));
+  }, [router]);
+
+  useEffect(() => {
+    if (authLoaded && username) {
+      const saved = localStorage.getItem(`chats_${username}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setTabs(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse saved tabs", e);
+        }
+      }
+    }
+  }, [authLoaded, username]);
+
+  useEffect(() => {
+    if (authLoaded && username) {
+      localStorage.setItem(`chats_${username}`, JSON.stringify(tabs));
+    }
+  }, [tabs, authLoaded, username]);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  };
 
   const handleSend = async (prompt: string, mode: ChatMode) => {
     setBanner(null);
@@ -387,9 +433,18 @@ export default function Home() {
     setActiveIndex(0);
   };
 
+  if (!authLoaded) {
+    return <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", color: "#fff" }}>Loading...</div>;
+  }
+
   return (
     <div className={styles.app}>
-      <Sidebar activeMode={activeMode} onModeChange={setActiveMode} />
+      <Sidebar 
+        activeMode={activeMode} 
+        onModeChange={setActiveMode} 
+        username={username}
+        onLogout={handleLogout}
+      />
 
       <div className={styles.main}>
         <div className={styles.shell}>

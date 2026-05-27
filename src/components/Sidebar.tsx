@@ -1,6 +1,6 @@
 "use client";
 
-import { Layers, MessageSquare, Code2, Network, Settings, ChevronRight, Sparkles, Menu } from "lucide-react";
+import { Layers, MessageSquare, Code2, Network, Settings, ChevronRight, Sparkles, Menu, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import styles from "./Sidebar.module.css";
 import type { ChatMode } from "./PromptInput";
@@ -8,6 +8,8 @@ import type { ChatMode } from "./PromptInput";
 interface SidebarProps {
   activeMode: ChatMode;
   onModeChange: (mode: ChatMode) => void;
+  username?: string | null;
+  onLogout?: () => void;
 }
 
 const NAV_ITEMS = [
@@ -17,7 +19,7 @@ const NAV_ITEMS = [
   { id: "swarm" as ChatMode, icon: <Network size={18} />, label: "Agent Swarm", desc: "Autonomous web research" },
 ];
 
-export default function Sidebar({ activeMode, onModeChange }: SidebarProps) {
+export default function Sidebar({ activeMode, onModeChange, username, onLogout }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -72,9 +74,15 @@ export default function Sidebar({ activeMode, onModeChange }: SidebarProps) {
 
       {/* Bottom section */}
       <div className={styles.bottom}>
-        <button className={styles.settingsBtn} title="Settings">
-          <Settings size={16} />
-          {!collapsed && <span>Settings</span>}
+        {username && (
+          <div className={styles.userSection} title={username}>
+            <User size={16} />
+            {!collapsed && <span className={styles.username}>{username}</span>}
+          </div>
+        )}
+        <button className={styles.settingsBtn} onClick={onLogout} title="Logout">
+          <LogOut size={16} />
+          {!collapsed && <span>Logout</span>}
         </button>
       </div>
     </aside>
