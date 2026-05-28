@@ -7,40 +7,67 @@ export interface AIModel {
   tags?: string[];
 }
 
+export const OPENROUTER_FREE_MODEL_IDS: string[] = [
+  "openrouter/owl-alpha",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "poolside/laguna-m.1:free",
+  "openai/gpt-oss-120b:free",
+  "z-ai/glm-4.5-air:free",
+  "poolside/laguna-xs.2:free",
+  "openai/gpt-oss-20b:free",
+  "nvidia/nemotron-3-nano-30b-a3b:free",
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+  "google/gemma-4-31b-it:free",
+  "deepseek/deepseek-v4-flash:free",
+  "nvidia/nemotron-nano-9b-v2:free",
+  "minimax/minimax-m2.5:free",
+  "nvidia/nemotron-nano-12b-2-vl:free",
+  "google/gemma-4-26b-a4b-it:free",
+];
+
+const OPENROUTER_FREE_MODEL_ID_SET = new Set(OPENROUTER_FREE_MODEL_IDS);
+
+export function isOpenRouterFreeModel(modelId: string): boolean {
+  return OPENROUTER_FREE_MODEL_ID_SET.has(modelId);
+}
+
 export const FEATURED_MODEL_IDS: string[] = [
-  // OpenAI
-  "openai/gpt-chat-latest",
-  "~openai/gpt-latest",
-  "openai/gpt-4o",
-  "openai/gpt-4o-mini",
-  "openai/o1",
-  "openai/o3-mini",
+// OpenAI
+"openai/gpt-chat-latest",
+"~openai/gpt-latest",
+"openai/gpt-4o",
+"openai/gpt-4o-mini",
+"openai/o1",
+"openai/o3-mini",
 
-  // Anthropic
-  "~anthropic/claude-sonnet-latest",
-  "~anthropic/claude-opus-latest",
-  "~anthropic/claude-haiku-latest",
-  "anthropic/claude-3.5-haiku",
+// Anthropic
+"~anthropic/claude-sonnet-latest",
+"~anthropic/claude-opus-latest",
+"~anthropic/claude-haiku-latest",
+"anthropic/claude-3.5-haiku",
 
-  // Google
-  "~google/gemini-pro-latest",
-  "~google/gemini-flash-latest",
-  "google/gemini-2.0-flash-001",
+// Google
+"~google/gemini-pro-latest",
+"~google/gemini-flash-latest",
+"google/gemini-2.0-flash-001",
 
-  // DeepSeek
-  "deepseek/deepseek-r1",
-  "deepseek/deepseek-chat",
+// DeepSeek
+"deepseek/deepseek-r1",
+"deepseek/deepseek-chat",
 
-  // Meta / Mistral / Qwen (popular open models)
-  "meta-llama/llama-3.3-70b-instruct",
-  "meta-llama/llama-3.3-70b-instruct:free",
-  "mistralai/mistral-medium-3-5",
-  "mistralai/mixtral-8x22b-instruct",
-  "qwen/qwen-2.5-coder-32b-instruct",
+// Meta / Mistral / Qwen (popular open models)
+"meta-llama/llama-3.3-70b-instruct",
+"meta-llama/llama-3.3-70b-instruct:free",
+"mistralai/mistral-medium-3-5",
+"mistralai/mixtral-8x22b-instruct",
+"qwen/qwen-2.5-coder-32b-instruct",
 
-  // Search / routing
-  "perplexity/sonar",
-  "openrouter/auto",
+// Search / routing
+"perplexity/sonar",
+"openrouter/auto",
+
+// OpenRouter Free
+...OPENROUTER_FREE_MODEL_IDS,
 ];
 
 const FEATURED_MODEL_ID_SET = new Set(FEATURED_MODEL_IDS);
@@ -50,6 +77,21 @@ export function isFeaturedModel(modelId: string): boolean {
 }
 
 export const MODELS: AIModel[] = [
+  { name: "OpenRouter: Owl Alpha (free)", id: "openrouter/owl-alpha", contextLength: "1.05M", provider: "OpenRouter", isFree: true },
+  { name: "NVIDIA: Nemotron 3 Super (free)", id: "nvidia/nemotron-3-super-120b-a12b:free", contextLength: "1.0M", provider: "NVIDIA", isFree: true },
+  { name: "Poolside: Laguna M.1 (free)", id: "poolside/laguna-m.1:free", contextLength: "262K", provider: "Poolside", isFree: true },
+  { name: "OpenAI: gpt-oss-120b (free)", id: "openai/gpt-oss-120b:free", contextLength: "131K", provider: "OpenAI", isFree: true },
+  { name: "Z.ai: GLM 4.5 Air (free)", id: "z-ai/glm-4.5-air:free", contextLength: "131K", provider: "Z.ai", isFree: true },
+  { name: "Poolside: Laguna XS.2 (free)", id: "poolside/laguna-xs.2:free", contextLength: "262K", provider: "Poolside", isFree: true },
+  { name: "OpenAI: gpt-oss-20b (free)", id: "openai/gpt-oss-20b:free", contextLength: "131K", provider: "OpenAI", isFree: true },
+  { name: "NVIDIA: Nemotron 3 Nano 30B A3B (free)", id: "nvidia/nemotron-3-nano-30b-a3b:free", contextLength: "256K", provider: "NVIDIA", isFree: true },
+  { name: "NVIDIA: Nemotron 3 Nano Omni (free)", id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", contextLength: "256K", provider: "NVIDIA", isFree: true },
+  { name: "Google: Gemma 4 31B (free)", id: "google/gemma-4-31b-it:free", contextLength: "262K", provider: "Google", isFree: true },
+  { name: "DeepSeek: DeepSeek V4 Flash (free)", id: "deepseek/deepseek-v4-flash:free", contextLength: "1.05M", provider: "DeepSeek", isFree: true },
+  { name: "NVIDIA: Nemotron Nano 9B V2 (free)", id: "nvidia/nemotron-nano-9b-v2:free", contextLength: "128K", provider: "NVIDIA", isFree: true },
+  { name: "MiniMax: MiniMax M2.5 (free)", id: "minimax/minimax-m2.5:free", contextLength: "262K", provider: "MiniMax", isFree: true },
+  { name: "NVIDIA: Nemotron Nano 12B 2 VL (free)", id: "nvidia/nemotron-nano-12b-2-vl:free", contextLength: "128K", provider: "NVIDIA", isFree: true },
+  { name: "Google: Gemma 4 26B A4B (free)", id: "google/gemma-4-26b-a4b-it:free", contextLength: "262K", provider: "Google", isFree: true },
   { name: "Qwen: Qwen3.7 Max", id: "qwen/qwen3.7-max", contextLength: "1.0M", provider: "Qwen" },
   { name: "xAI: Grok Build 0.1", id: "x-ai/grok-build-0.1", contextLength: "256K", provider: "xAI" },
   { name: "Google: Gemini 3.5 Flash", id: "google/gemini-3.5-flash", contextLength: "1.0M", provider: "Google" },
@@ -59,9 +101,7 @@ export const MODELS: AIModel[] = [
   { name: "xAI: Grok 4.3", id: "x-ai/grok-4.3", contextLength: "1.0M", provider: "xAI" },
   { name: "IBM: Granite 4.1 8B", id: "ibm-granite/granite-4.1-8b", contextLength: "131K", provider: "IBM" },
   { name: "Mistral: Mistral Medium 3.5", id: "mistralai/mistral-medium-3-5", contextLength: "262K", provider: "Mistral" },
-  { name: "NVIDIA: Nemotron 3 Nano Omni (free)", id: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free", contextLength: "256K", provider: "NVIDIA", isFree: true },
-  { name: "Poolside: Laguna XS.2 (free)", id: "poolside/laguna-xs.2:free", contextLength: "131K", provider: "Poolside", isFree: true },
-  { name: "Poolside: Laguna M.1 (free)", id: "poolside/laguna-m.1:free", contextLength: "131K", provider: "Poolside", isFree: true },
+
   { name: "Anthropic Claude Haiku Latest", id: "~anthropic/claude-haiku-latest", contextLength: "200K", provider: "Anthropic" },
   { name: "OpenAI GPT Mini Latest", id: "~openai/gpt-mini-latest", contextLength: "400K", provider: "OpenAI" },
   { name: "Google Gemini Pro Latest", id: "~google/gemini-pro-latest", contextLength: "1.0M", provider: "Google" },
@@ -85,7 +125,6 @@ export const MODELS: AIModel[] = [
   { name: "Anthropic: Claude Opus 4.7", id: "anthropic/claude-opus-4.7", contextLength: "1.0M", provider: "Anthropic" },
   { name: "Anthropic: Claude Opus 4.6 (Fast)", id: "anthropic/claude-opus-4.6-fast", contextLength: "1.0M", provider: "Anthropic" },
   { name: "Z.ai: GLM 5.1", id: "z-ai/glm-5.1", contextLength: "203K", provider: "Z.ai" },
-  { name: "Google: Gemma 4 31B (free)", id: "google/gemma-4-31b-it:free", contextLength: "262K", provider: "Google", isFree: true },
   { name: "Google: Gemma 4 31B", id: "google/gemma-4-31b-it", contextLength: "262K", provider: "Google" },
   { name: "Qwen: Qwen3.6 Plus", id: "qwen/qwen3.6-plus", contextLength: "1.0M", provider: "Qwen" },
   { name: "Arcee AI: Trinity Large Thinking (free)", id: "arcee-ai/trinity-large-thinking:free", contextLength: "262K", provider: "Arcee AI", isFree: true },
@@ -98,7 +137,6 @@ export const MODELS: AIModel[] = [
   { name: "OpenAI: GPT-5.4 Nano", id: "openai/gpt-5.4-nano", contextLength: "400K", provider: "OpenAI" },
   { name: "OpenAI: GPT-5.4 Mini", id: "openai/gpt-5.4-mini", contextLength: "400K", provider: "OpenAI" },
   { name: "Mistral: Mistral Small 4", id: "mistralai/mistral-small-2603", contextLength: "262K", provider: "Mistral" },
-  { name: "NVIDIA: Nemotron 3 Super (free)", id: "nvidia/nemotron-3-super-120b-a12b:free", contextLength: "1.0M", provider: "NVIDIA", isFree: true },
   { name: "NVIDIA: Nemotron 3 Super", id: "nvidia/nemotron-3-super-120b-a12b", contextLength: "1.0M", provider: "NVIDIA" },
   { name: "Qwen: Qwen3.5-9B", id: "qwen/qwen3.5-9b", contextLength: "262K", provider: "Qwen" },
   { name: "OpenAI: GPT-5.4 Pro", id: "openai/gpt-5.4-pro", contextLength: "1.1M", provider: "OpenAI" },
@@ -109,7 +147,6 @@ export const MODELS: AIModel[] = [
   { name: "Qwen: Qwen3.5-122B-A10B", id: "qwen/qwen3.5-122b-a10b", contextLength: "262K", provider: "Qwen" },
   { name: "Google: Gemini 3.1 Pro Preview", id: "google/gemini-3.1-pro-preview", contextLength: "1.0M", provider: "Google" },
   { name: "Anthropic: Claude Sonnet 4.6", id: "anthropic/claude-sonnet-4.6", contextLength: "1.0M", provider: "Anthropic" },
-  { name: "MiniMax: MiniMax M2.5 (free)", id: "minimax/minimax-m2.5:free", contextLength: "205K", provider: "MiniMax", isFree: true },
   { name: "MiniMax: MiniMax M2.5", id: "minimax/minimax-m2.5", contextLength: "205K", provider: "MiniMax" },
   { name: "Qwen: Qwen3 Max Thinking", id: "qwen/qwen3-max-thinking", contextLength: "262K", provider: "Qwen", tags: ["reasoning"] },
   { name: "Anthropic: Claude Opus 4.6", id: "anthropic/claude-opus-4.6", contextLength: "1.0M", provider: "Anthropic" },
@@ -204,6 +241,8 @@ export const MODELS: AIModel[] = [
 
 export const FEATURED_MODELS: AIModel[] = MODELS.filter((m) => isFeaturedModel(m.id));
 
+export const OPENROUTER_FREE_MODELS: AIModel[] = MODELS.filter((m) => isOpenRouterFreeModel(m.id));
+
 export const PROVIDER_COLORS: Record<string, string> = {
   OpenAI: "#10a37f",
   Anthropic: "#cc785c",
@@ -230,9 +269,9 @@ export const REASONING_MODELS = MODELS.filter(m => m.tags?.includes("reasoning")
 
 // Default 5 models for initial state
 export const DEFAULT_MODELS = [
-  MODELS.find(m => m.id === "anthropic/claude-opus-4") ?? MODELS[3],
-  MODELS.find(m => m.id === "openai/gpt-5.4") ?? MODELS[22],
-  MODELS.find(m => m.id === "google/gemini-2.5-pro") ?? MODELS[91],
-  MODELS.find(m => m.id === "deepseek/deepseek-r1") ?? MODELS[108],
-  MODELS.find(m => m.id === "qwen/qwen3-max") ?? MODELS[82],
+  MODELS.find(m => m.id === "openrouter/owl-alpha") ?? MODELS[0],
+  MODELS.find(m => m.id === "nvidia/nemotron-3-super-120b-a12b:free") ?? MODELS[1],
+  MODELS.find(m => m.id === "openai/gpt-oss-120b:free") ?? MODELS[3],
+  MODELS.find(m => m.id === "deepseek/deepseek-v4-flash:free") ?? MODELS[10],
+  MODELS.find(m => m.id === "google/gemma-4-31b-it:free") ?? MODELS[9],
 ];

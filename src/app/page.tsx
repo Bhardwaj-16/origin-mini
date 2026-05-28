@@ -12,6 +12,28 @@ import styles from "./page.module.css";
 
 type ApiMessage = { role: "system" | "user" | "assistant"; content: string };
 
+const MAX_RECENT_MESSAGES = 8;
+
+function buildContextMessages(messages: ApiMessage[]): ApiMessage[] {
+  if (messages.length <= MAX_RECENT_MESSAGES + 2) return messages;
+
+  const older = messages.slice(0, messages.length - MAX_RECENT_MESSAGES);
+  const recent = messages.slice(messages.length - MAX_RECENT_MESSAGES);
+
+  const summaryParts: string[] = [];
+  for (const m of older) {
+    const tag = m.role === "user" ? "User" : m.role === "assistant" ? "Assistant" : "System";
+    const snippet = m.content.length > 120 ? m.content.slice(0, 120) + "…" : m.content;
+    summaryParts.push(`${tag}: ${snippet}`);
+  }
+  const summary = summaryParts.join("\n");
+
+  return [
+    { role: "system", content: `Summary of earlier conversation:\n${summary}` },
+    ...recent,
+  ];
+}
+
 type TabState = PanelState & { tabId: string; requestId: string | null };
 
 function makeTabId(): string {
@@ -264,7 +286,7 @@ export default function Home() {
         content: m.content,
       }));
 
-      const apiMessages: ApiMessage[] = [...baseMessages, userMsg];
+      const apiMessages: ApiMessage[] = buildContextMessages([...baseMessages, userMsg]);
       let assistant = "";
       let scheduled = false;
 
@@ -346,8 +368,8 @@ export default function Home() {
     abortControllers.current[tabId] = controller;
     const requestId = makeTabId();
 
-    const trimmed = msgs.slice(0, lastUserIndex + 1);
-    const apiMessages: ApiMessage[] = trimmed.map((m) => ({ role: m.role, content: m.content }));
+  const trimmed = msgs.slice(0, lastUserIndex + 1);
+  const apiMessages: ApiMessage[] = buildContextMessages(trimmed.map((m) => ({ role: m.role, content: m.content })));
 
     setTabs((prev) =>
       prev.map((t) =>

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, X, Check, ChevronDown, Zap, Code2, Globe } from "lucide-react";
-import { MODELS, FEATURED_MODELS, AIModel, getProviderColor, isFeaturedModel } from "@/lib/models";
+import { Search, X, Check, ChevronDown, Zap, Code2, Globe, Sparkles } from "lucide-react";
+import { MODELS, FEATURED_MODELS, OPENROUTER_FREE_MODELS, AIModel, getProviderColor, isFeaturedModel, isOpenRouterFreeModel } from "@/lib/models";
 import styles from "./ModelSelector.module.css";
 
 interface ModelSelectorProps {
@@ -21,7 +21,7 @@ export default function ModelSelector({
   disabled = false,
 }: ModelSelectorProps) {
   const [open, setOpen] = useState(false);
-  const [scope, setScope] = useState<"Featured" | "All">("Featured");
+  const [scope, setScope] = useState<"Featured" | "OpenRouter" | "All">("Featured");
   const [search, setSearch] = useState("");
   const [provider, setProvider] = useState("All");
   const [tag, setTag] = useState("All");
@@ -44,7 +44,7 @@ export default function ModelSelector({
     }
   }, [open]);
 
-  const baseModels = scope === "Featured" ? FEATURED_MODELS : MODELS;
+  const baseModels = scope === "Featured" ? FEATURED_MODELS : scope === "OpenRouter" ? OPENROUTER_FREE_MODELS : MODELS;
   const providers = ["All", ...Array.from(new Set(baseModels.map((m) => m.provider))).sort()];
 
   const filtered = baseModels.filter(m => {
@@ -89,30 +89,41 @@ export default function ModelSelector({
       {open && (
         <div className={styles.dropdown} role="listbox">
           {/* Scope */}
-          <div className={styles.scopeRow}>
-            <button
-              className={`${styles.scopeTab} ${scope === "Featured" ? styles.scopeTabActive : ""}`}
-              onClick={() => {
-                setScope("Featured");
-                setProvider("All");
-                setTag("All");
-              }}
-              type="button"
-            >
-              Featured
-            </button>
-            <button
-              className={`${styles.scopeTab} ${scope === "All" ? styles.scopeTabActive : ""}`}
-              onClick={() => {
-                setScope("All");
-                setProvider("All");
-                setTag("All");
-              }}
-              type="button"
-            >
-              All models
-            </button>
-          </div>
+            <div className={styles.scopeRow}>
+              <button
+                className={`${styles.scopeTab} ${scope === "Featured" ? styles.scopeTabActive : ""}`}
+                onClick={() => {
+                  setScope("Featured");
+                  setProvider("All");
+                  setTag("All");
+                }}
+                type="button"
+              >
+                Featured
+              </button>
+              <button
+                className={`${styles.scopeTab} ${scope === "OpenRouter" ? styles.scopeTabActive : ""}`}
+                onClick={() => {
+                  setScope("OpenRouter");
+                  setProvider("All");
+                  setTag("All");
+                }}
+                type="button"
+              >
+                <Sparkles size={12} /> Free
+              </button>
+              <button
+                className={`${styles.scopeTab} ${scope === "All" ? styles.scopeTabActive : ""}`}
+                onClick={() => {
+                  setScope("All");
+                  setProvider("All");
+                  setTag("All");
+                }}
+                type="button"
+              >
+                All models
+              </button>
+            </div>
 
           {/* Search */}
           <div className={styles.searchBar}>
@@ -191,7 +202,8 @@ export default function ModelSelector({
                       {model.isFree && <span className={styles.freeBadge}>FREE</span>}
                     </span>
                   </span>
-                  {isFeaturedModel(model.id) && <span className={styles.featuredBadge}>FEATURED</span>}
+                  {isFeaturedModel(model.id) && !isOpenRouterFreeModel(model.id) && <span className={styles.featuredBadge}>FEATURED</span>}
+              {isOpenRouterFreeModel(model.id) && <span className={styles.freeBadge}>FREE</span>}
                   {model.tags?.map(t => (
                     <span key={t} className={styles.tag}>{t}</span>
                   ))}
@@ -203,7 +215,7 @@ export default function ModelSelector({
             )}
           </div>
           <div className={styles.footer}>
-            {scope === "Featured" ? `${FEATURED_MODELS.length} featured models` : `${MODELS.length} models available`}
+            {scope === "Featured" ? `${FEATURED_MODELS.length} featured models` : scope === "OpenRouter" ? `${OPENROUTER_FREE_MODELS.length} free models` : `${MODELS.length} models available`}
           </div>
         </div>
       )}
