@@ -16,14 +16,22 @@
   min-width: 60px;
 }
 
-/* ── Logo ──────────────────────────────────────────── */
-.logo {
+/* ── Logo / Toggle ───────────────────────────────────── */
+.logoToggle {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 20px 16px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   flex-shrink: 0;
+  background: transparent;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  width: 100%;
+  color: inherit;
+  font-family: inherit;
 }
 
 .logoIcon {
@@ -65,7 +73,7 @@
   text-transform: uppercase;
 }
 
-.collapseBtn {
+.collapseBtnInner {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,13 +82,18 @@
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 6px;
-  cursor: pointer;
   color: #5a5a88;
   transition: all 150ms;
   flex-shrink: 0;
   margin-left: auto;
 }
-.collapseBtn:hover { background: rgba(255,255,255,0.1); color: #f0f0ff; }
+.logoToggle:hover .collapseBtnInner {
+  background: rgba(255,255,255,0.1);
+  color: #f0f0ff;
+}
+.logoToggle:hover {
+  background: rgba(255,255,255,0.03);
+}
 
 /* ── Nav ───────────────────────────────────────────── */
 .nav {

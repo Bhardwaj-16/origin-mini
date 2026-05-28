@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
-import PromptInput, { ChatMode } from "@/components/PromptInput";
+import PromptInput from "@/components/PromptInput";
 import ChatPanel, { PanelState } from "@/components/ChatPanel";
 import ModelSelector from "@/components/ModelSelector";
 import { AIModel, DEFAULT_MODELS, getProviderColor } from "@/lib/models";
@@ -154,7 +154,6 @@ export default function Home() {
   const [username, setUsername] = useState<string | null>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
 
-  const [activeMode, setActiveMode] = useState<ChatMode>("general");
   const [tabs, setTabs] = useState<TabState[]>(() => [createTab(DEFAULT_MODELS[0] ?? DEFAULT_MODELS[DEFAULT_MODELS.length - 1])]);
   const [chatHistory, setChatHistory] = useState<TabState[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -245,15 +244,10 @@ export default function Home() {
     }
   };
 
-  const handleSend = async (prompt: string, mode: ChatMode) => {
-    setBanner(null);
+const handleSend = async (prompt: string, _mode: "general") => {
+  setBanner(null);
 
-    if (mode !== "general") {
-      setBanner("Only Multi-Chat is enabled right now. Reasoning/Codo/Swarm are coming next.");
-      return;
-    }
-
-    if (tabs.length === 0) return;
+  if (tabs.length === 0) return;
 
     const userMsg = { role: "user" as const, content: prompt };
 
@@ -512,9 +506,7 @@ export default function Home() {
 
   return (
     <div className={styles.app}>
-      <Sidebar 
-        activeMode={activeMode} 
-        onModeChange={setActiveMode} 
+      <Sidebar
         username={username}
         onLogout={handleLogout}
         history={sidebarHistory}
@@ -604,12 +596,9 @@ export default function Home() {
             ))}
           </div>
 
-          <PromptInput
-            onSend={handleSend}
-            disabled={activeMode !== "general"}
-            activeMode={activeMode}
-            onModeChange={setActiveMode}
-          />
+      <PromptInput
+        onSend={handleSend}
+      />
         </div>
       </div>
 
