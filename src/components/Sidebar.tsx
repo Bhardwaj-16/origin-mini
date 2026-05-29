@@ -15,9 +15,11 @@ interface SidebarProps {
   onLogout?: () => void;
   history?: ChatHistoryItem[];
   onChatSelect?: (id: string) => void;
+  appMode?: "normal" | "reasoning";
+  onAppModeChange?: (mode: "normal" | "reasoning") => void;
 }
 
-export default function Sidebar({ username, onLogout, history = [], onChatSelect }: SidebarProps) {
+export default function Sidebar({ username, onLogout, history = [], onChatSelect, appMode = "normal", onAppModeChange }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -43,6 +45,37 @@ export default function Sidebar({ username, onLogout, history = [], onChatSelect
           </span>
         )}
       </button>
+
+      {/* Main Modes */}
+      <div className={styles.nav}>
+        {!collapsed && <div className={styles.navLabel}>Modes</div>}
+        <button
+          className={`${styles.navItem} ${appMode === "normal" ? styles.navItemActive : ""}`}
+          onClick={() => onAppModeChange?.("normal")}
+          title={collapsed ? "Chat" : undefined}
+        >
+          <MessageSquare size={16} className={styles.navIcon} />
+          {!collapsed && (
+            <div className={styles.navContent}>
+              <span className={styles.navLabel2}>Chat</span>
+              <span className={styles.navDesc}>Standard AI models</span>
+            </div>
+          )}
+        </button>
+        <button
+          className={`${styles.navItem} ${appMode === "reasoning" ? styles.navItemActive : ""}`}
+          onClick={() => onAppModeChange?.("reasoning")}
+          title={collapsed ? "Advanced Reasoning" : undefined}
+        >
+          <Layers size={16} className={styles.navIcon} />
+          {!collapsed && (
+            <div className={styles.navContent}>
+              <span className={styles.navLabel2}>Advanced Reasoning</span>
+              <span className={styles.navDesc}>Multi-AI debate</span>
+            </div>
+          )}
+        </button>
+      </div>
 
       {/* History */}
       <div className={styles.history}>

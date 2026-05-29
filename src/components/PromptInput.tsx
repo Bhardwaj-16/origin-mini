@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
-import {
-  Send, Mic, Paperclip
-} from "lucide-react";
+import { Send } from "lucide-react";
 import styles from "./PromptInput.module.css";
 
 export type ChatMode = "general";
@@ -72,12 +70,6 @@ export default function PromptInput({ onSend, disabled }: PromptInputProps) {
         {/* Bottom bar */}
         <div className={styles.bottomBar}>
           <div className={styles.leftActions}>
-            <button className={styles.attachBtn} title="Attach file" disabled>
-              <Paperclip size={15} />
-            </button>
-            <button className={styles.attachBtn} title="Voice input" disabled>
-              <Mic size={15} />
-            </button>
             {charCount > 0 && (
               <span className={`${styles.charCount} ${isOverLimit ? styles.charCountOver : ""}`}>
                 {charCount.toLocaleString()} / 6,000

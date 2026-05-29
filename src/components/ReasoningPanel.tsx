@@ -26,6 +26,7 @@ interface ReasoningPanelProps {
   error: string | null;
   isRunning: boolean;
   currentStep: number;
+  liveLogs?: string[];
 }
 
 const STEP_ICONS = [
@@ -79,7 +80,7 @@ function escHtml(t: string) {
   return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export default function ReasoningPanel({ steps, result, error, isRunning, currentStep }: ReasoningPanelProps) {
+export default function ReasoningPanel({ steps, result, error, isRunning, currentStep, liveLogs }: ReasoningPanelProps) {
   if (!isRunning && steps.length === 0 && !result && !error) {
     return (
       <div className={styles.emptyState}>
@@ -156,6 +157,22 @@ export default function ReasoningPanel({ steps, result, error, isRunning, curren
         </div>
       )}
 
+      {/* Live reasoning log */}
+      {liveLogs && liveLogs.length > 0 && !result && (
+        <div className={styles.liveLogBox}>
+          <div className={styles.liveLogHeader}>
+            <Zap size={12} className={styles.liveLogIcon} />
+            <span>Live Reasoning Log</span>
+          </div>
+          <div className={styles.liveLogContent}>
+            {liveLogs.map((log, i) => (
+              <div key={i} className={styles.liveLogLine}>{log}</div>
+            ))}
+            {isRunning && <div className={styles.liveLogLineCursor}>_</div>}
+          </div>
+        </div>
+      )}
+
       {/* Error */}
       {error && (
         <div className={styles.errorBox}>
@@ -219,7 +236,7 @@ export default function ReasoningPanel({ steps, result, error, isRunning, curren
           <div className={styles.finalAnswer}>
             <div className={styles.finalHeader}>
               <Zap size={16} className={styles.finalIcon} />
-              <span>Synthesized Final Answer</span>
+              <span>Consensus Synthesis</span>
               <div className={styles.finalBadge}>Hallucination-Resistant</div>
             </div>
             <div

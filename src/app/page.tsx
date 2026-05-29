@@ -6,8 +6,9 @@ import { Plus, X } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import PromptInput from "@/components/PromptInput";
 import ChatPanel, { PanelState } from "@/components/ChatPanel";
+import ReasoningPanel, { ReasoningStep, ReasoningResult } from "@/components/ReasoningPanel";
 import ModelSelector from "@/components/ModelSelector";
-import { AIModel, DEFAULT_MODELS, getProviderColor } from "@/lib/models";
+import { AIModel, DEFAULT_MODELS, getProviderColor, MODELS } from "@/lib/models";
 import styles from "./page.module.css";
 
 type ApiMessage = { role: "system" | "user" | "assistant"; content: string };
@@ -158,6 +159,15 @@ export default function Home() {
   const [chatHistory, setChatHistory] = useState<TabState[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  const [appMode, setAppMode] = useState<"normal" | "reasoning">("normal");
+
+  const [reasoningSteps, setReasoningSteps] = useState<ReasoningStep[]>([]);
+  const [reasoningResult, setReasoningResult] = useState<ReasoningResult | null>(null);
+  const [reasoningError, setReasoningError] = useState<string | null>(null);
+  const [isReasoningRunning, setIsReasoningRunning] = useState(false);
+  const [currentReasoningStep, setCurrentReasoningStep] = useState(0);
+  const [liveLogs, setLiveLogs] = useState<string[]>([]);
+
   const [modelPickerTabId, setModelPickerTabId] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
 
@@ -244,10 +254,85 @@ export default function Home() {
     }
   };
 
-const handleSend = async (prompt: string, _mode: "general") => {
-  setBanner(null);
+  const handleSend = async (prompt: string, _mode: "general") => {
+    setBanner(null);
 
-  if (tabs.length === 0) return;
+    if (tabs.length === 0) return;
+
+    if (appMode === "reasoning") {
+      setIsReasoningRunning(true);
+      setReasoningError(null);
+      setReasoningResult(null);
+      setReasoningSteps([]);
+      setLiveLogs([]);
+      setCurrentReasoningStep(1);
+      
+      try {
+        setReasoningSteps([{ step: 1, label: "Gathering initial perspectives..." }]);
+        const answers: { model: string; content: string }[] = [];
+        
+        const tasks = tabs.map(async (tab) => {
+          let content = "";
+          setLiveLogs(prev => [...prev, `[${tab.model.id}] Starting initial analysis...`]);
+          await streamChatCompletion({
+            model: tab.model.id,
+            messages: [{ role: "user", content: prompt }],
+            onDelta: (d) => { content += d; }
+          });
+          answers.push({ model: tab.model.name, content });
+          setLiveLogs(prev => [...prev, `[${tab.model.id}] Completed initial response.`]);
+        });
+        await Promise.allSettled(tasks);
+
+        setCurrentReasoningStep(2);
+        setReasoningSteps(prev => [...prev, { step: 2, label: "Cross-critiquing responses..." }]);
+        const critiques: { model: string; critique: string }[] = [];
+        
+        const critiquePrompt = `Original user prompt: ${prompt}\n\nHere are the answers from other AI models:\n${answers.map(a => `[${a.model}]: ${a.content}`).join("\n\n")}\n\nPlease critique these answers, point out any contradictions or errors, and provide your refined perspective.`;
+        
+        const critiqueTasks = tabs.map(async (tab) => {
+          let content = "";
+          setLiveLogs(prev => [...prev, `[${tab.model.id}] Reviewing peer responses and finding contradictions...`]);
+          await streamChatCompletion({
+            model: tab.model.id,
+            messages: [{ role: "user", content: critiquePrompt }],
+            onDelta: (d) => { content += d; }
+          });
+          critiques.push({ model: tab.model.name, critique: content });
+          setLiveLogs(prev => [...prev, `[${tab.model.id}] Completed cross-critique.`]);
+        });
+        await Promise.allSettled(critiqueTasks);
+
+        setCurrentReasoningStep(3);
+        setReasoningSteps(prev => [...prev, { step: 3, label: "Jury synthesizing final verdict..." }]);
+        
+        const juryModelId = "openrouter/owl-alpha";
+        const synthesisPrompt = `Original user prompt: ${prompt}\n\nInitial answers:\n${answers.map(a => `[${a.model}]: ${a.content}`).join("\n\n")}\n\nCross-critiques:\n${critiques.map(c => `[${c.model}]: ${c.critique}`).join("\n\n")}\n\nBased on all this information, act as the Jury and provide the final, hallucination-resistant, comprehensive verdict.`;
+        
+        setLiveLogs(prev => [...prev, `[Jury: ${juryModelId}] Reading all context and synthesizing...`]);
+        let finalAnswer = "";
+        await streamChatCompletion({
+          model: juryModelId,
+          messages: [{ role: "user", content: synthesisPrompt }],
+          onDelta: (d) => { finalAnswer += d; }
+        });
+        setLiveLogs(prev => [...prev, `[Jury: ${juryModelId}] Synthesis complete.`]);
+
+        setReasoningResult({
+          finalAnswer,
+          restructuredPrompt: prompt,
+          models: tabs.map(t => t.model.name),
+          answers,
+          critiques,
+        });
+        setCurrentReasoningStep(4);
+      } catch (e: any) {
+        setReasoningError(e.message || "Failed during reasoning process");
+      } finally {
+        setIsReasoningRunning(false);
+      }
+      return;
+    }
 
     const userMsg = { role: "user" as const, content: prompt };
 
@@ -457,6 +542,10 @@ const handleSend = async (prompt: string, _mode: "general") => {
   };
 
   const handleNewTab = () => {
+    if (appMode === "reasoning" && tabs.length >= 5) {
+      setBanner("Maximum 5 tabs allowed in Advanced Reasoning mode.");
+      return;
+    }
     const model = DEFAULT_MODELS[0] ?? DEFAULT_MODELS[DEFAULT_MODELS.length - 1];
     setTabs((prev) => {
       const next = [...prev, createTab(model)];
@@ -511,6 +600,8 @@ const handleSend = async (prompt: string, _mode: "general") => {
         onLogout={handleLogout}
         history={sidebarHistory}
         onChatSelect={handleChatSelect}
+        appMode={appMode}
+        onAppModeChange={(mode) => setAppMode(mode)}
       />
 
       <div className={styles.main}>
@@ -518,8 +609,8 @@ const handleSend = async (prompt: string, _mode: "general") => {
           <header className={styles.header}>
             <div className={styles.headerLeft}>
               <div className={styles.title}>
-                <h1>Chat</h1>
-                <p>Use Chrome-style tabs to switch models and chats.</p>
+                <h1>{appMode === "normal" ? "Chat" : "Advanced Reasoning"}</h1>
+                <p>{appMode === "normal" ? "Use Chrome-style tabs to switch models and chats." : "Multi-AI Debate & Synthesis Environment"}</p>
               </div>
 
               {banner && (
@@ -584,16 +675,27 @@ const handleSend = async (prompt: string, _mode: "general") => {
           </div>
 
           <div className={styles.panels}>
-            {tabs.map((t, i) => (
-              <ChatPanel
-                key={t.tabId}
-                panel={t}
-                isActive={activeIndex === i}
-                onActivate={() => setActiveIndex(i)}
-                onRetry={() => handleRetry(t.tabId)}
-                onModelClick={() => setModelPickerTabId(t.tabId)}
+            {appMode === "reasoning" ? (
+              <ReasoningPanel
+                steps={reasoningSteps}
+                result={reasoningResult}
+                error={reasoningError}
+                isRunning={isReasoningRunning}
+                currentStep={currentReasoningStep}
+                liveLogs={liveLogs}
               />
-            ))}
+            ) : (
+              tabs.map((t, i) => (
+                <ChatPanel
+                  key={t.tabId}
+                  panel={t}
+                  isActive={activeIndex === i}
+                  onActivate={() => setActiveIndex(i)}
+                  onRetry={() => handleRetry(t.tabId)}
+                  onModelClick={() => setModelPickerTabId(t.tabId)}
+                />
+              ))
+            )}
           </div>
 
       <PromptInput
