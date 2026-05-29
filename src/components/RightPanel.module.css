@@ -1,6 +1,6 @@
 .rightPanel {
-  width: 280px;
-  min-width: 280px;
+  width: 17.5rem;
+  min-width: 17.5rem;
   height: 100vh;
   display: flex;
   flex-direction: column;

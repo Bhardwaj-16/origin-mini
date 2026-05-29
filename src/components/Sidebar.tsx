@@ -124,14 +124,7 @@ export default function Sidebar({ username, onLogout, history = [], onChatSelect
               </button>
             )}
           </div>
-          {!collapsed && (
-            <div className={styles.userUsage}>
-              <div className={styles.usageBar}>
-                <div className={styles.usageFill} style={{ width: "75%" }}></div>
-              </div>
-              <span className={styles.usageText}>75% USAGE REMAINING</span>
-            </div>
-          )}
+
         </div>
       </div>
     </aside>
