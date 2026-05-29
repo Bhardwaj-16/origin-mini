@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { Copy, RotateCcw, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Copy, RotateCcw, CheckCircle2, AlertCircle, Loader2, Zap } from "lucide-react";
 import { AIModel, getProviderColor } from "@/lib/models";
 import styles from "./ChatPanel.module.css";
 
@@ -129,8 +129,11 @@ export default function ChatPanel({
         {/* Empty state */}
         {panel.messages.length === 0 && panel.status === "idle" && (
           <div className={styles.emptyState}>
-            <span className={styles.emptyDot} style={{ background: color }} />
-            <p>Ready to respond</p>
+            <div className={styles.emptyIconBox}>
+              <Zap size={24} color="#f97316" />
+            </div>
+            <h2>Collaborative Intelligence</h2>
+            <p>Ready to assist with advanced reasoning, technical analysis, and multi-modal creative workflows.</p>
           </div>
         )}
 

@@ -8,6 +8,7 @@ import PromptInput from "@/components/PromptInput";
 import ChatPanel, { PanelState } from "@/components/ChatPanel";
 import ReasoningPanel, { ReasoningStep, ReasoningResult } from "@/components/ReasoningPanel";
 import ModelSelector from "@/components/ModelSelector";
+import RightPanel from "@/components/RightPanel";
 import { AIModel, DEFAULT_MODELS, getProviderColor, MODELS } from "@/lib/models";
 import styles from "./page.module.css";
 
@@ -702,6 +703,7 @@ export default function Home() {
         onSend={handleSend}
       />
         </div>
+        {appMode === "normal" && <RightPanel />}
       </div>
 
       {modelPickerTabId !== null && (

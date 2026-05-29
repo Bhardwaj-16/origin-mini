@@ -107,16 +107,32 @@ export default function Sidebar({ username, onLogout, history = [], onChatSelect
 
       {/* Bottom section */}
       <div className={styles.bottom}>
-        {username && (
-          <div className={styles.userSection} title={username}>
-            <User size={16} />
-            {!collapsed && <span className={styles.username}>{username}</span>}
+        <div className={styles.userCard}>
+          <div className={styles.userCardHeader}>
+            <div className={styles.userAvatar}>
+              {username ? username.substring(0, 2).toUpperCase() : "JD"}
+            </div>
+            {!collapsed && (
+              <div className={styles.userInfo}>
+                <span className={styles.userName}>{username || "JOHN DOE"}</span>
+                <span className={styles.userPlan}>PRO PLAN</span>
+              </div>
+            )}
+            {!collapsed && (
+              <button className={styles.settingsBtn} onClick={onLogout} title="Logout">
+                <LogOut size={14} />
+              </button>
+            )}
           </div>
-        )}
-        <button className={styles.settingsBtn} onClick={onLogout} title="Logout">
-          <LogOut size={16} />
-          {!collapsed && <span>Logout</span>}
-        </button>
+          {!collapsed && (
+            <div className={styles.userUsage}>
+              <div className={styles.usageBar}>
+                <div className={styles.usageFill} style={{ width: "75%" }}></div>
+              </div>
+              <span className={styles.usageText}>75% USAGE REMAINING</span>
+            </div>
+          )}
+        </div>
       </div>
     </aside>
   );

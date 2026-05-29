@@ -24,7 +24,7 @@
   padding: 5px 12px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
+  border-radius: 4px;
   font-family: 'Outfit', sans-serif;
   font-size: 0.8rem;
   color: #7070a0;
@@ -60,7 +60,7 @@
 .inputBox {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.11);
-  border-radius: 16px;
+  border-radius: 4px;
   transition: border-color 200ms, box-shadow 200ms;
   overflow: hidden;
 }
@@ -109,7 +109,7 @@
   height: 30px;
   background: none;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   color: #5a5a88;
   transition: color 150ms, background 150ms;
@@ -142,7 +142,7 @@
   padding: 7px 16px;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px;
+  border-radius: 4px;
   font-family: 'Outfit', sans-serif;
   font-size: 0.825rem;
   font-weight: 500;
@@ -176,7 +176,7 @@
   padding: 6px 14px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px;
+  border-radius: 4px;
   font-family: 'Outfit', sans-serif;
   font-size: 0.775rem;
   color: #7070a0;

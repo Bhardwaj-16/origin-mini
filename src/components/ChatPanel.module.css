@@ -3,7 +3,7 @@
   flex-direction: column;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 16px;
+  border-radius: 4px;
   overflow: hidden;
   cursor: pointer;
   transition: border-color 200ms, background 200ms, box-shadow 200ms;
@@ -44,7 +44,7 @@
   border: none;
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: 8px;
+  border-radius: 4px;
   transition: background 150ms;
   flex: 1;
   min-width: 0;
@@ -93,7 +93,7 @@
   height: 28px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 7px;
+  border-radius: 4px;
   cursor: pointer;
   color: #7070a0;
   transition: all 150ms;
@@ -110,7 +110,7 @@
   padding: 3px 8px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 20px;
+  border-radius: 4px;
   font-size: 0.65rem;
   color: #7070a0;
 }
@@ -153,18 +153,32 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  opacity: 0.4;
+  gap: 16px;
+  text-align: center;
+  padding: 20px;
 }
-.emptyDot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  opacity: 0.5;
+.emptyIconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; /* Slightly rounded or sharp as requested */
+  margin-bottom: 8px;
+}
+.emptyState h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
 }
 .emptyState p {
-  font-size: 0.8125rem;
+  font-size: 0.85rem;
   color: #7070a0;
+  max-width: 400px;
+  line-height: 1.5;
 }
 
 .typingWrapper {
@@ -174,7 +188,7 @@
 .typingBubble {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 10px 14px;
 }
 
@@ -185,7 +199,7 @@
 .userContent {
   background: var(--accent-soft);
   border: 1px solid var(--accent-border);
-  border-radius: 12px 12px 3px 12px;
+  border-radius: 4px 4px 0px 4px;
   padding: 8px 12px;
   font-size: 0.8125rem;
   color: #ffe9d9;
@@ -208,7 +222,7 @@
   padding: 10px 12px;
   background: rgba(239,68,68,0.08);
   border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 0.8125rem;
   color: #fca5a5;
 }
