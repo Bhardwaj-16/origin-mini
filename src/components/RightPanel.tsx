@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, MessageCircle, Activity } from "lucide-react";
+import { Clock, MessageCircle } from "lucide-react";
 import styles from "./RightPanel.module.css";
 
 export default function RightPanel() {
@@ -34,24 +34,6 @@ export default function RightPanel() {
         <div className={styles.timeBox}>
           <span className={styles.timeText}>{formatTime(time)}</span>
           <span className={styles.dateText}>{formatDate(time)}</span>
-        </div>
-      </div>
-
-      <div className={styles.section}>
-        <div className={styles.sectionTitle}>
-          <Activity size={16} className={styles.sectionIcon} />
-          Active Session
-        </div>
-        <div className={styles.sessionCard}>
-          <div className={styles.sessionHeader}>Metrics</div>
-          <div className={styles.sessionRow}>
-            <span className={styles.sessionLabel}>Duration</span>
-            <span className={styles.sessionValue}>02:45:12</span>
-          </div>
-          <div className={styles.sessionRow}>
-            <span className={styles.sessionLabel}>Compute Load</span>
-            <span className={`${styles.sessionValue} ${styles.sessionHighlight}`}>MEDIUM</span>
-          </div>
         </div>
       </div>
 
