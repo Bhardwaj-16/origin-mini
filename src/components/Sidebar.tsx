@@ -24,21 +24,23 @@ export default function Sidebar({ username, onLogout, history = [], onChatSelect
 
   return (
     <aside className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ""}`}>
-      {/* Logo / Toggle */}
       <button
         className={styles.logoToggle}
         onClick={() => setCollapsed(v => !v)}
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        <div className={styles.logoIcon}>
-          <Layers size={20} />
+        <div className={styles.logoContainer}>
+          {collapsed ? (
+            <div className={styles.logoIcon}>
+              <img src="/logo.png" className={styles.logoImgCollapsed} alt="O" />
+            </div>
+          ) : (
+            <div className={styles.logoWrapper}>
+              <img src="/logo.png" className={styles.logoImgExpanded} alt="ORIGIN" />
+              <span className={styles.logoSub}>mini</span>
+            </div>
+          )}
         </div>
-        {!collapsed && (
-          <div className={styles.logoText}>
-            <span className={styles.logoName}>ORIGIN</span>
-            <span className={styles.logoSub}>mini</span>
-          </div>
-        )}
         {!collapsed && (
           <span className={styles.collapseBtnInner}>
             <Menu size={14} />

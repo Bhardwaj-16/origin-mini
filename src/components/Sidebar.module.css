@@ -34,17 +34,47 @@
   font-family: inherit;
 }
 
+.logoContainer {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+}
+
+.logoImgExpanded {
+  height: 22px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(249, 115, 22, 0.15));
+}
+
+.logoImgCollapsed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 7% center; /* slightly offset to focus on the 'O' nicely */
+  border-radius: 8px;
+}
+
 .logoIcon {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: var(--gradient-brand);
+  background: #110703; /* Match dark theme logo background */
+  border: 1px solid rgba(249, 115, 22, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 4px 18px rgba(249,115,22,0.28);
+  box-shadow: 0 4px 18px rgba(249,115,22,0.15);
 }
 
 .logoText {
@@ -66,11 +96,16 @@
 }
 
 .logoSub {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #5a5a88;
-  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #f97316; /* Theme brand color orange */
+  letter-spacing: 0.12em;
   text-transform: uppercase;
+  background: rgba(249, 115, 22, 0.1);
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  margin-bottom: 1px;
 }
 
 .collapseBtnInner {
