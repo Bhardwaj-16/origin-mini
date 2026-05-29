@@ -40,10 +40,10 @@ export default function RightPanel() {
       <div className={styles.section} style={{ marginTop: "auto" }}>
         <button 
           className={styles.feedbackBtn} 
-          onClick={() => alert("Feedback form opening soon")}
+          onClick={() => window.open("https://forms.gle/7dacJzrP4f2SBKpMA", "_blank")}
         >
           <MessageCircle size={16} />
-          Feedback form (Coming soon)
+          Feedback Form
         </button>
       </div>
     </aside>
