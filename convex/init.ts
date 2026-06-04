@@ -26,7 +26,7 @@ export const setup = mutation({
       await ctx.db.insert("apiConfigs", {
         mode: "featured",
         apiProvider: "openrouter",
-        apiKey: "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",
+        apiKey: process.env.OPENROUTER_API_KEY || "",
         baseUrl: "https://openrouter.ai/api/v1",
       });
     }
@@ -36,7 +36,7 @@ export const setup = mutation({
       await ctx.db.insert("apiConfigs", {
         mode: "all",
         apiProvider: "hackclub",
-        apiKey: "sk-hc-v1-fa4270e627b64d6bbcdf3a35db9802f5e377037bad1f48dfabb1342a7cd1206b",
+        apiKey: process.env.HACKCLUB_API_KEY || "",
         baseUrl: "https://ai.hackclub.com/proxy/v1",
       });
     }
